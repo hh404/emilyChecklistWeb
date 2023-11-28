@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     body: JSON.stringify({
                       userID: 1, // 用户 ID
                       activityID: activity.ActivityID,
-                      points: activity.RewardPoints
+                      points: activity.basePoints
                     })
                   })
                   .then(response => response.json())
@@ -146,7 +146,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
           
             item.appendChild(checkbox);
-            item.appendChild(document.createTextNode(` ${activity.Name} - 奖励积分1: ${activity.RewardPoints}`));
+            item.appendChild(document.createTextNode(` ${activity.Name} - 奖励积分1: ${activity.basePoints}`));
           item.appendChild(completedTimeSpan); // 添加完成时间元素
             item.appendChild(uploadButton);
             list.appendChild(item);
@@ -214,6 +214,7 @@ function fetchActivities(selectedDate = '') {
   fetch(url)
   .then(response => response.json())
   .then(data => {
+    console.log("🤢🤢");
       const list = document.getElementById('activity-list');
       list.innerHTML = ''; // 清空现有的列表
       // 这里是创建和显示活动列表项的逻辑
@@ -224,6 +225,16 @@ function fetchActivities(selectedDate = '') {
           const checkbox = document.createElement('input');
           checkbox.type = 'checkbox';
           checkbox.id = activity.ActivityID;
+
+        // 创建显示持续时间的标签
+        const durationLabel = document.createElement('span');
+        durationLabel.id = `duration-${activity.ActivityID}`;
+
+        // 创建开始/结束按钮
+        const timerButton = document.createElement('button');
+        timerButton.textContent = '开始';
+        //timerButton.style.marginLeft = 'auto'; // 右对齐按钮
+        timerButton.onclick = () => toggleTimer(timerButton, durationLabel);
           
         // 创建显示完成时间的元素
         const completedTimeSpan = document.createElement('span');
@@ -251,7 +262,7 @@ function fetchActivities(selectedDate = '') {
                   body: JSON.stringify({
                     userID: 1, // 用户 ID
                     activityID: activity.ActivityID,
-                    points: activity.RewardPoints
+                    points: activity.basePoints
                   })
                 })
                 .then(response => response.json())
@@ -327,10 +338,13 @@ function fetchActivities(selectedDate = '') {
           })
           .catch(error => console.error('Error:', error));
           
-        
           item.appendChild(checkbox);
-          item.appendChild(document.createTextNode(` ${activity.Name} - 奖励积分1: ${activity.RewardPoints}`));
-        item.appendChild(completedTimeSpan); // 添加完成时间元素
+          item.appendChild(document.createTextNode(`${activity.Name} - 可获得积分: ${activity.availablePoints}`));
+          item.appendChild(completedTimeSpan); // 添加完成时间元素
+          if (activity.Name === 'Get Up') {
+            item.appendChild(timerButton);
+          }
+          item.appendChild(durationLabel);
           item.appendChild(uploadButton);
           list.appendChild(item);
           
@@ -395,6 +409,21 @@ function fetchActivities(selectedDate = '') {
           console.log(mediaFiles);
       })
       .catch(error => console.error('Error:', error));
+  }
+
+  function toggleTimer(button, durationLabel) {
+    if (button.textContent === '开始') {
+        button.textContent = '结束';
+        durationLabel.startTime = Date.now(); // 记录开始时间
+    } else {
+        button.textContent = '开始';
+        const endTime = Date.now();
+        const duration = Math.round((endTime - durationLabel.startTime) / 60000); // 持续时间(分钟)
+        durationLabel.textContent = ` 持续时间: ${duration}分钟`;
+
+        // 发送持续时间到服务器
+        recordActivity(userID, activityID, duration);
+    }
   }
   
   })
