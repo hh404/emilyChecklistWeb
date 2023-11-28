@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>作业管理</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <button id="back-button">返回</button>
+    <h1>作业管理</h1>
+    
+    <label for="datePicker">选择日期：</label>
+    <input type="date" id="datePicker">
+    
+    <div id="homeworkList"></div>
+
+    <script src="homework.js"></script>
+    <script>
+        document.getElementById('back-button').addEventListener('click', function() {
+            window.location.href = 'index.html'; // 假设您的checklist界面是 index.html
+        });
+    </script>
+
+        <!-- 模态窗口结构 -->
+    <div id="previewModal" style="display: none; position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); background-color: white; padding: 20px; z-index: 1000; border: 1px solid black;">
+        <span id="closeModal" style="cursor: pointer;">关闭</span>
+        <div id="previewContent"></div>
+    </div>
+
+</body>
+</html>

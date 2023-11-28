@@ -5,6 +5,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin-left: 16px;
 }
 
 h1 {
@@ -19,7 +20,7 @@ h1 {
 #activity-list li {
   background-color: #f2f2f2;
   margin: 5px;
-  padding: 10px;
+  padding: 2px;
   border-radius: 5px;
   width: 300px; /* 默认宽度，适用于较大屏幕 */
 }
@@ -34,4 +35,27 @@ h1 {
 input[type="file"] {
 display: block;
 margin: 10px 0;
+}
+
+#user-info {
+  display: flex; /* 使用flex布局使得元素在一行显示 */
+  justify-content: space-between; /* 元素之间的间距均匀分布 */
+  align-items: center; /* 垂直居中 */
+  flex-wrap: wrap; /* 如果不够放，则换行显示 */
+  gap: 4px; /* 设置元素之间的间隙 */
+}
+
+#user-info > span {
+  margin-right: 4px; /* 每个span元素之间增加右边距 */
+  white-space: nowrap; /* 防止内容换行 */
+}
+
+/* 为总积分和特别积分设置不同的样式，如果需要的话 */
+#total-points,
+#special-points {
+  flex-basis: 100%; /* 让这两个元素各自占据一行 */
+}
+
+.completed-time {
+  margin-left: 10px; /* 在完成时间和其他元素之间添加一些间距 */
 }

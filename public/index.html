@@ -4,6 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>成长系统</title>
+<input type="date" id="calendar" />
+<div id="user-info">
+	<span id="user-name">用户名: </span>
+	<span id="user-age">年龄: </span>
+	<span id="total-points">总积分: </span>
+	<button id="redeem-button">积分兑换</button>
+	 <!-- 添加作业按钮 -->
+	 <button id="homeworkButton">作业</button>
+	<span id="special-points">特别积分: </span>
+</div>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,5 +21,15 @@
 <ul id="activity-list"></ul>
 
 <script src="app.js"></script>
+<script>
+	document.getElementById('redeem-button').addEventListener('click', function() {
+		window.location.href = 'redeem.html'; // 导航到积分兑换页面
+	});
+</script>
+<script>
+	document.getElementById('homeworkButton').addEventListener('click', function() {
+		window.location.href = 'homework.html'; // 导航到积分兑换页面
+	});
+</script>
 </body>
 </html>
