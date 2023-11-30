@@ -92,30 +92,30 @@ app.get('/activities', (req, res) => {
     }
     const userDiligence = results[0].diligence;
     const sql = `
-  SELECT a.ActivityID, a.Name, a.basePoints,
-      ua.CompletionDateTime,
-      CASE WHEN DATE(ua.CompletionDateTime) = ? THEN 1 ELSE 0 END AS CompletedToday
-  FROM Activities a
-  LEFT JOIN UserActivities ua
-  ON a.ActivityID = ua.ActivityID
-  AND ua.UserID = ?
-  AND DATE(ua.CompletionDateTime) = ?
-  `;
+    SELECT a.ActivityID, a.Name, a.basePoints,
+    ua.CompletionDateTime, ua.Duration,
+    CASE WHEN DATE(ua.CurrentActivityDate) = ? THEN 1 ELSE 0 END AS CompletedToday
+FROM Activities a
+LEFT JOIN UserActivities ua
+ON a.ActivityID = ua.ActivityID
+AND ua.UserID = ?
+AND DATE(ua.CurrentActivityDate) = ?;
+    `;
     db.query(sql, [queryDate, userID, queryDate], (err, result) => {
       if (err) throw err;
       result.forEach(activity => {
-        console.log(`activities ActivityID: ${activity.ActivityID}, CompletedToday: ${activity.CompletedToday}`);
+        console.log(`activities ActivityID: ${activity.ActivityID}, CompletedToday: ${activity.CompletedToday}, duration: ${activity.Duration}`);
       });
       console.log('activities: ', result);
       //res.json(result);
       // 计算可获得积分
       const enrichedActivities = result.map(activity => {
         return {
-            ...activity,
-            availablePoints: activity.basePoints * userDiligence
+          ...activity,
+          availablePoints: activity.basePoints * userDiligence
         };
-    });
-    res.json(enrichedActivities);
+      });
+      res.json(enrichedActivities);
     });
   });
 });
@@ -207,19 +207,48 @@ app.post('/useractivities', (req, res) => {
 // 记录用户完成的活动
 app.post('/recordActivity', (req, res) => {
   const { userID, activityID, duration } = req.body;
+  const currentDate = new Date().toISOString().slice(0, 10);
 
-  const sql = `
-      INSERT INTO UserActivities (UserID, ActivityID, CompletionDate, Duration)
-      VALUES (?, ?, CURDATE(), ?)
-      ON DUPLICATE KEY UPDATE Duration = VALUES(Duration);
+  // 首先，检查当前日期是否存在活动记录
+  const checkSql = `
+      SELECT UserActivityID FROM UserActivities 
+      WHERE UserID = ? AND ActivityID = ? AND CurrentActivityDate = CURDATE();
   `;
 
-  db.query(sql, [userID, activityID, duration], (err, result) => {
-      if (err) {
-          console.error(err);
-          return res.status(500).send('Error recording activity');
+  db.query(checkSql, [userID, activityID], (checkErr, checkResults) => {
+      if (checkErr) {
+          console.error(checkErr);
+          return res.status(500).send('检查现有活动时出错');
       }
-      res.send('Activity recorded or updated with duration');
+
+      if (checkResults.length > 0) {
+          // 如果存在，更新持续时间
+          const updateSql = `
+              UPDATE UserActivities 
+              SET Duration = ? 
+              WHERE UserActivityID = ?;
+          `;
+          db.query(updateSql, [duration, checkResults[0].UserActivityID], (updateErr, updateResults) => {
+              if (updateErr) {
+                  console.error(updateErr);
+                  return res.status(500).send('更新活动持续时间时出错');
+              }
+              res.send('活动持续时间更新成功');
+          });
+      } else {
+          // 如果不存在，插入新记录
+          const insertSql = `
+              INSERT INTO UserActivities (UserID, ActivityID, CurrentActivityDate, Duration)
+              VALUES (?, ?, CURDATE(), ?);
+          `;
+          db.query(insertSql, [userID, activityID, duration], (insertErr, insertResults) => {
+              if (insertErr) {
+                  console.error(insertErr);
+                  return res.status(500).send('记录新活动时出错');
+              }
+              res.send('新活动记录成功，包含持续时间');
+          });
+      }
   });
 });
 

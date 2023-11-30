@@ -214,7 +214,7 @@ function fetchActivities(selectedDate = '') {
   fetch(url)
   .then(response => response.json())
   .then(data => {
-    console.log("🤢🤢");
+    console.log("🤢🤢${activity.title}");
       const list = document.getElementById('activity-list');
       list.innerHTML = ''; // 清空现有的列表
       // 这里是创建和显示活动列表项的逻辑
@@ -230,11 +230,20 @@ function fetchActivities(selectedDate = '') {
         const durationLabel = document.createElement('span');
         durationLabel.id = `duration-${activity.ActivityID}`;
 
+      // 如果活动有持续时间，显示它
+      if (activity.Duration > 0) {
+        const duration = activity.Duration;
+        const hours = Math.floor(duration / 3600); // 计算小时数
+        const minutes = Math.floor((duration % 3600) / 60); // 计算分钟数
+        const seconds = duration % 60; // 计算秒数
+    
+        durationLabel.textContent = `持续时间: ${hours}小时 ${minutes}分钟 ${seconds}秒`;
+      }
         // 创建开始/结束按钮
         const timerButton = document.createElement('button');
         timerButton.textContent = '开始';
         //timerButton.style.marginLeft = 'auto'; // 右对齐按钮
-        timerButton.onclick = () => toggleTimer(timerButton, durationLabel);
+        timerButton.onclick = () => toggleTimer(timerButton, durationLabel, "1", activity.ActivityID);
           
         // 创建显示完成时间的元素
         const completedTimeSpan = document.createElement('span');
@@ -254,6 +263,7 @@ function fetchActivities(selectedDate = '') {
           // 添加复选框的事件监听器
           checkbox.addEventListener('change', (event) => {
               if (event.target.checked) {
+                const durationValue = activity.Duration ? activity.Duration : 0;
                 fetch('/useractivities', {
                   method: 'POST',
                   headers: {
@@ -262,7 +272,8 @@ function fetchActivities(selectedDate = '') {
                   body: JSON.stringify({
                     userID: 1, // 用户 ID
                     activityID: activity.ActivityID,
-                    points: activity.basePoints
+                    points: activity.basePoints,
+                    duration: durationValue // 添加duration参数
                   })
                 })
                 .then(response => response.json())
@@ -411,20 +422,45 @@ function fetchActivities(selectedDate = '') {
       .catch(error => console.error('Error:', error));
   }
 
-  function toggleTimer(button, durationLabel) {
+  function toggleTimer(button, durationLabel, userID, activityID) {
     if (button.textContent === '开始') {
         button.textContent = '结束';
         durationLabel.startTime = Date.now(); // 记录开始时间
     } else {
         button.textContent = '开始';
         const endTime = Date.now();
-        const duration = Math.round((endTime - durationLabel.startTime) / 60000); // 持续时间(分钟)
-        durationLabel.textContent = ` 持续时间: ${duration}分钟`;
+        const durationMillis = endTime - durationLabel.startTime; // 持续时间（毫秒）
+        const totalSeconds = Math.floor(durationMillis / 1000); // 总秒数
+        const durationHours = Math.floor(durationMillis / 3600000); // 持续时间的小时部分
+        const durationMins = Math.floor((durationMillis % 3600000) / 60000); // 持续时间的分钟部分
+        const durationSecs = Math.floor((durationMillis % 60000) / 1000); // 持续时间的秒数部分
+
+        durationLabel.textContent = ` 持续时间: ${durationHours}时 ${durationMins}分 ${durationSecs}秒`;
 
         // 发送持续时间到服务器
-        recordActivity(userID, activityID, duration);
+        // 注意：这里您可能需要考虑以何种形式发送数据（仅分钟，或分钟和秒）
+       recordActivity(userID, activityID, totalSeconds);
     }
   }
+
+  function recordActivity(userID, activityID, duration) {
+    fetch('/recordActivity', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            userID: userID,
+            activityID: activityID,
+            duration: duration
+        })
+    })
+    .then(response => response.text())
+    .then(data => {
+        console.log(data); // 这里可以添加一些处理逻辑，例如显示一个提示信息
+    })
+    .catch(error => console.error('Error:', error));
+}
   
   })
   .catch(error => console.error('Error:', error));
