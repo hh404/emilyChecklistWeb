@@ -352,7 +352,7 @@ function fetchActivities(selectedDate = '') {
           item.appendChild(checkbox);
           item.appendChild(document.createTextNode(`${activity.Name} - 可获得积分: ${activity.availablePoints}`));
           item.appendChild(completedTimeSpan); // 添加完成时间元素
-          if (activity.Name === 'Get Up') {
+          if (activity.ShowTimer) {
             item.appendChild(timerButton);
           }
           item.appendChild(durationLabel);

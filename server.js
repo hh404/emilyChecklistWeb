@@ -92,15 +92,15 @@ app.get('/activities', (req, res) => {
     }
     const userDiligence = results[0].diligence;
     const sql = `
-    SELECT a.ActivityID, a.Name, a.basePoints,
-    ua.CompletionDateTime, ua.Duration,
-    CASE WHEN DATE(ua.CurrentActivityDate) = ? THEN 1 ELSE 0 END AS CompletedToday
-FROM Activities a
-LEFT JOIN UserActivities ua
-ON a.ActivityID = ua.ActivityID
-AND ua.UserID = ?
-AND DATE(ua.CurrentActivityDate) = ?;
-    `;
+    SELECT a.ActivityID, a.Name, a.basePoints, a.ShowTimer,
+           ua.CompletionDateTime, ua.Duration,
+           CASE WHEN DATE(ua.CurrentActivityDate) = ? THEN 1 ELSE 0 END AS CompletedToday
+    FROM Activities a
+    LEFT JOIN UserActivities ua
+    ON a.ActivityID = ua.ActivityID
+    AND ua.UserID = ?
+    AND DATE(ua.CurrentActivityDate) = ?;
+`;
     db.query(sql, [queryDate, userID, queryDate], (err, result) => {
       if (err) throw err;
       result.forEach(activity => {
