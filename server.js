@@ -3,6 +3,7 @@ const mysql = require('mysql');
 const bodyParser = require('body-parser');
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 app.use(bodyParser.json());
@@ -63,8 +64,26 @@ const attachmentStorage = multer.diskStorage({
 });
 const attachmentUpload = multer({ storage: attachmentStorage });
 
+// 设置 multer 的存储配置
+const emilyStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+      cb(null, 'emily/');
+  },
+  filename: (req, file, cb) => {
+      const newFileName = req.body.newFileName;
+      if (newFileName) {
+          cb(null, newFileName + path.extname(file.originalname));
+      } else {
+          cb(null, file.originalname);
+      }
+  }
+});
+
+const emilyUpload = multer({ storage: emilyStorage });
+
 // 配置静态文件服务 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/emily', express.static(path.join(__dirname, 'emily')));
 
 const port = 30031;
 app.use(express.static('public'));
@@ -592,3 +611,29 @@ function authenticateToken(req, res, next) {
     next();
   });
 }
+
+app.post('/emilyUpload', emilyUpload.single('file'), (req, res) => {
+  const newFileName = req.body.newFileName;
+  const originalPath = path.join(__dirname, 'emily', req.file.originalname);
+
+  if (newFileName) {
+    // 获取当前时间，格式化为 "年后两位月日时分"
+    const now = new Date();
+    const formattedTime = now.getFullYear().toString().slice(-2) + 
+                          String(now.getMonth() + 1).padStart(2, '0') + 
+                          String(now.getDate()).padStart(2, '0') + 
+                          String(now.getHours()).padStart(2, '0') + 
+                          String(now.getMinutes()).padStart(2, '0');
+
+    const newPath = path.join(__dirname, 'emily', `${newFileName}-${formattedTime}${path.extname(req.file.originalname)}`);
+    fs.rename(originalPath, newPath, (err) => {
+      if (err) {
+        console.error('重命名失败：', err);
+        return res.status(500).send('重命名失败');
+      }
+      res.json({ message: '文件上传并重命名成功' });
+    });
+  } else {
+    res.json({ message: '文件上传成功' });
+  }
+});

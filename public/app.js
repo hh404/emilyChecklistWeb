@@ -262,6 +262,16 @@ function fetchActivities(selectedDate = '') {
         
           // 添加复选框的事件监听器
           checkbox.addEventListener('change', (event) => {
+              // 获取当前小时
+              const currentHour = new Date().getHours();
+
+              // 如果是“起床”活动，检查当前时间是否在 6 到 9 点之间
+              if (activity.ActivityID === 1 && (currentHour < 6 || currentHour > 9)) {
+                  alert('起床活动只能在早上 6 点到 9 点之间选中');
+                  event.preventDefault(); // 阻止复选框状态更改
+                  checkbox.checked = false; // 取消复选框的选中状态
+                  return;
+              }
               if (event.target.checked) {
                 const durationValue = activity.Duration ? activity.Duration : 0;
                 fetch('/useractivities', {

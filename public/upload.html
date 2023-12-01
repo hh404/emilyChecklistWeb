@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>文件上传</title>
+</head>
+<body>
+    <button id="back-button">返回</button>
+    <h1>文件上传</h1>
+    <input type="file" id="fileInput" multiple>
+    <input type="text" id="newFileName" placeholder="输入新文件名（不含扩展名）">
+    <button onclick="uploadFile()">上传</button>
+
+    <script src="upload.js"></script>
+    <script>
+        document.getElementById('back-button').addEventListener('click', function() {
+            window.location.href = 'index.html'; // 假设您的checklist界面是 index.html
+        });
+    </script>
+</body>
+</html>
