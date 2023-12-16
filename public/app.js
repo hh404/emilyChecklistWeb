@@ -248,6 +248,8 @@ function fetchActivities(selectedDate = '') {
         // 创建显示完成时间的元素
         const completedTimeSpan = document.createElement('span');
         completedTimeSpan.id = `completed-time-${activity.ActivityID}`;
+
+        console.log("activity.ActivityID",activity.ActivityID, "activity.CompletedToday", activity.CompletedToday);
         // 检查活动是否已完成
         if (activity.CompletedToday > 0) {
           console.log("activity.CompletedToday",activity.ActivityID, "CompletionDateTime", activity.CompletionDateTime);
@@ -349,7 +351,7 @@ function fetchActivities(selectedDate = '') {
                 // 点击链接时显示 Popup
                 mediaLink.addEventListener('click', function(event) {
                   event.preventDefault(); // 阻止链接默认行为
-                  showMediaPopup(`http://192.168.1.3:30031/${file.FilePath}`, file.FileType);
+                  showMediaPopup(`http://192.168.0.188:30031/${file.FilePath}`, file.FileType);
                 });
                 
                 mediaItem.appendChild(mediaLink);

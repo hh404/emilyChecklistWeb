@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 //     mediaLink.href = `#`;
                 // mediaLink.textContent = file.FilePath;
                     link.onclick = function() { 
-                        showPreview(`http://192.168.1.3:30031/${attachment.FilePath}`);
+                        showPreview(`http://192.168.0.188:30031/${attachment.FilePath}`);
                     };
                     listItem.appendChild(link);
                     attachmentListElement.appendChild(listItem);

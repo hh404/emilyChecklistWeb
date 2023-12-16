@@ -113,12 +113,12 @@ app.get('/activities', (req, res) => {
     const sql = `
     SELECT a.ActivityID, a.Name, a.basePoints, a.ShowTimer,
            ua.CompletionDateTime, ua.Duration,
-           CASE WHEN DATE(ua.CurrentActivityDate) = ? THEN 1 ELSE 0 END AS CompletedToday
+           CASE WHEN DATE(ua.CompletionDateTime) = ? THEN 1 ELSE 0 END AS CompletedToday
     FROM Activities a
     LEFT JOIN UserActivities ua
     ON a.ActivityID = ua.ActivityID
     AND ua.UserID = ?
-    AND DATE(ua.CurrentActivityDate) = ?;
+    AND DATE(ua.CompletionDateTime) = ?;
 `;
     db.query(sql, [queryDate, userID, queryDate], (err, result) => {
       if (err) throw err;
@@ -231,7 +231,7 @@ app.post('/recordActivity', (req, res) => {
   // 首先，检查当前日期是否存在活动记录
   const checkSql = `
       SELECT UserActivityID FROM UserActivities 
-      WHERE UserID = ? AND ActivityID = ? AND CurrentActivityDate = CURDATE();
+      WHERE UserID = ? AND ActivityID = ? AND CompletionDateTime = CURDATE();
   `;
 
   db.query(checkSql, [userID, activityID], (checkErr, checkResults) => {
@@ -257,7 +257,7 @@ app.post('/recordActivity', (req, res) => {
       } else {
           // 如果不存在，插入新记录
           const insertSql = `
-              INSERT INTO UserActivities (UserID, ActivityID, CurrentActivityDate, Duration)
+              INSERT INTO UserActivities (UserID, ActivityID, CompletionDateTime, Duration)
               VALUES (?, ?, CURDATE(), ?);
           `;
           db.query(insertSql, [userID, activityID, duration], (insertErr, insertResults) => {
