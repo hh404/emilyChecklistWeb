@@ -258,7 +258,7 @@ app.post('/recordActivity', (req, res) => {
           // 如果不存在，插入新记录
           const insertSql = `
               INSERT INTO UserActivities (UserID, ActivityID, CompletionDateTime, Duration)
-              VALUES (?, ?, CURDATE(), ?);
+              VALUES (?, ?, NOW(), ?);
           `;
           db.query(insertSql, [userID, activityID, duration], (insertErr, insertResults) => {
               if (insertErr) {

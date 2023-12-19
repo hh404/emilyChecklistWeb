@@ -239,15 +239,16 @@ function fetchActivities(selectedDate = '') {
     
         durationLabel.textContent = `持续时间: ${hours}小时 ${minutes}分钟 ${seconds}秒`;
       }
-        // 创建开始/结束按钮
-        const timerButton = document.createElement('button');
-        timerButton.textContent = '开始';
-        //timerButton.style.marginLeft = 'auto'; // 右对齐按钮
-        timerButton.onclick = () => toggleTimer(timerButton, durationLabel, "1", activity.ActivityID);
           
         // 创建显示完成时间的元素
         const completedTimeSpan = document.createElement('span');
         completedTimeSpan.id = `completed-time-${activity.ActivityID}`;
+
+        // 创建开始/结束按钮
+        const timerButton = document.createElement('button');
+        timerButton.textContent = '开始';
+        //timerButton.style.marginLeft = 'auto'; // 右对齐按钮
+        timerButton.onclick = () => toggleTimer(completedTimeSpan, timerButton, durationLabel, "1", activity.ActivityID);
 
         console.log("activity.ActivityID",activity.ActivityID, "activity.CompletedToday", activity.CompletedToday);
         // 检查活动是否已完成
@@ -434,7 +435,7 @@ function fetchActivities(selectedDate = '') {
       .catch(error => console.error('Error:', error));
   }
 
-  function toggleTimer(button, durationLabel, userID, activityID) {
+  function toggleTimer(completedTimeSpan, button, durationLabel, userID, activityID) {
     if (button.textContent === '开始') {
         button.textContent = '结束';
         durationLabel.startTime = Date.now(); // 记录开始时间
@@ -448,6 +449,7 @@ function fetchActivities(selectedDate = '') {
         const durationSecs = Math.floor((durationMillis % 60000) / 1000); // 持续时间的秒数部分
 
         durationLabel.textContent = ` 持续时间: ${durationHours}时 ${durationMins}分 ${durationSecs}秒`;
+        //completedTimeSpan.textContent = ` --[完成时间: ${formatTime(endTime)}]`;
 
         // 发送持续时间到服务器
         // 注意：这里您可能需要考虑以何种形式发送数据（仅分钟，或分钟和秒）
